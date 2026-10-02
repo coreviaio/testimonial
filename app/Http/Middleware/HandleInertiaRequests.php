@@ -28,11 +28,18 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+
             'auth' => [
                 'user' => $user,
+
+                'roles' => fn (): array => $user
+                    ? Rbac::roles($user->id)
+                    : [],
+
                 'permissions' => fn (): array => $user
                     ? Rbac::permissions($user->id)
                     : [],
+
                 'practitioner' => $practitioner
                     ? [
                         'exists' => true,
@@ -45,6 +52,7 @@ class HandleInertiaRequests extends Middleware
                         'approved' => false,
                     ],
             ],
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

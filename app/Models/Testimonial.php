@@ -65,6 +65,11 @@ class Testimonial extends Model
         return $this->belongsTo(User::class, 'author_user_id');
     }
 
+    public function flagger(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'flagged_by_user_id');
+    }
+
     public function practitioner(): BelongsTo
     {
         return $this->belongsTo(Practitioner::class);

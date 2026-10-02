@@ -44,6 +44,20 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
+        'h2research_cache' => [
+            'driver' => 'sqlite',
+            'database' => env(
+                'H2RESEARCH_CACHE_DATABASE',
+                storage_path('app/h2research.sqlite')
+            ),
+            'prefix' => '',
+            'foreign_key_constraints' => true,
+            'busy_timeout' => 5000,
+            'journal_mode' => 'WAL',
+            'synchronous' => 'NORMAL',
+            'transaction_mode' => 'IMMEDIATE',
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

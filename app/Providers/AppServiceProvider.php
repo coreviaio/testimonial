@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Jobs\SyncH2ResearchReferenceData;
+use App\Support\Rbac;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +28,22 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Event::listen(
+            Login::class,
+            function (Login $event): void {
+                $userId = (int) $event->user->getAuthIdentifier();
+
+                if (! Rbac::hasPermission(
+                    $userId,
+                    'h2research_data.sync'
+                )) {
+                    return;
+                }
+
+                SyncH2ResearchReferenceData::dispatch();
+            }
+        );
     }
 
     /**

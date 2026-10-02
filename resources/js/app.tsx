@@ -5,6 +5,7 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import FrontendLayout from "@/components/frontend/layout/frontend-layout";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -14,6 +15,8 @@ void createInertiaApp({
         switch (true) {
             case name === 'welcome':
                 return null;
+            case name.startsWith('frontend/'):
+                return FrontendLayout;
             // case name.startsWith('admin/'):
             //     return null;
             case name.startsWith('auth/'):

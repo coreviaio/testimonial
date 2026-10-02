@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'h2research' => [
+        'base_url' => env('H2RESEARCH_BASE_URL'),
+        'timeout' => (int) env('H2RESEARCH_TIMEOUT', 180),
+    ],
+
 ];

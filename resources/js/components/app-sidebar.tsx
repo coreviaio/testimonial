@@ -1,4 +1,5 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import {
     BookOpen,
     BriefcaseMedical, ClipboardCheck, ClipboardList,
@@ -6,7 +7,7 @@ import {
     FolderGit2,
     KeyRound,
     LayoutGrid,
-    NotebookPen,
+    NotebookPen, RefreshCw, ScrollText,
     ShieldCheck,
     Users,
     UsersRound,
@@ -58,6 +59,47 @@ const footerNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<RbacPageProps>().props;
     const permissions = new Set(auth.permissions ?? []);
+
+    const roles = new Set(auth.roles ?? []);
+
+    const isNormalUser =
+        roles.has('user')
+        && !roles.has('admin')
+        && !roles.has('practitioner');
+
+    const userNavItems: NavItem[] = isNormalUser
+        ? [
+            {
+                title: 'My Observations',
+                href: '/my/observations',
+                icon: NotebookPen,
+            },
+        ]
+        : [];
+
+    const [syncRequesting, setSyncRequesting] = useState(false);
+
+    const canSyncH2Research = permissions.has(
+        'h2research_data.sync'
+    );
+
+    const syncH2Research = () => {
+        if (syncRequesting) {
+            return;
+        }
+
+        router.post(
+            '/admin/h2research-sync',
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onStart: () => setSyncRequesting(true),
+                onFinish: () => setSyncRequesting(false),
+            },
+        );
+    };
+
     const isApprovedPractitioner = auth.practitioner?.approved ?? false;
 
     const practitionerNavItems = [
@@ -114,6 +156,24 @@ export function AppSidebar() {
                 icon: FileCheck2,
             }
             : null,
+
+        permissions.has(
+            'practitioner_observations.review',
+        )
+            ? {
+                title: 'Review Practitioner Observations',
+                href: '/admin/review-practitioner-observations',
+                icon: ClipboardList,
+            }
+            : null,
+
+        permissions.has('audit_logs.view')
+            ? {
+                title: 'Audit Logs',
+                href: '/admin/audit-logs',
+                icon: ScrollText,
+            }
+            : null,
     ].filter((item): item is NavItem => item !== null);
 
     return (
@@ -134,6 +194,7 @@ export function AppSidebar() {
                 <NavMain
                     items={[
                         ...mainNavItems,
+                        ...userNavItems,
                         ...practitionerNavItems,
                         ...rbacNavItems,
                     ]}
@@ -141,7 +202,38 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                {canSyncH2Research && (
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                type="button"
+                                tooltip="Sync H2Research"
+                                disabled={syncRequesting}
+                                onClick={syncH2Research}
+                            >
+                                <RefreshCw
+                                    className={
+                                        syncRequesting
+                                            ? 'animate-spin'
+                                            : ''
+                                    }
+                                />
+
+                                <span>
+                        {syncRequesting
+                            ? 'Starting Sync...'
+                            : 'Sync H2Research'}
+                    </span>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                )}
+
+                <NavFooter
+                    items={footerNavItems}
+                    className="mt-auto"
+                />
+
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

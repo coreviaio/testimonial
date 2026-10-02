@@ -57,6 +57,7 @@ export type RbacPageProps = {
             email: string;
         } | null;
 
+        roles: string[];
         permissions: string[];
 
         practitioner: {

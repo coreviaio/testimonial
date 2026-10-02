@@ -29,9 +29,6 @@ class Rbac
             ->exists();
     }
 
-    /**
-     * @return array<int, string>
-     */
     public static function permissions(int $userId): array
     {
         if (self::isAdmin($userId)) {
@@ -48,6 +45,17 @@ class Rbac
             ->distinct()
             ->orderBy('permissions.slug')
             ->pluck('permissions.slug')
+            ->all();
+    }
+
+    public static function roles(int $userId): array
+    {
+        return DB::table('user_roles')
+            ->join('roles', 'roles.id', '=', 'user_roles.role_id')
+            ->where('user_roles.user_id', $userId)
+            ->distinct()
+            ->orderBy('roles.slug')
+            ->pluck('roles.slug')
             ->all();
     }
 }
